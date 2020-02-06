@@ -5,25 +5,26 @@ const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 
 const {favicon} = require('./middlewares/favicon');
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const {notFound} = require('./middlewares/404');
 
 const app = express();
 
 app.use(favicon);
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser());
+
 app.use(sassMiddleware({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public'),
   indentedSyntax: true, // true = .sass and false = .scss
   sourceMap: true
 }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(notFound);
 
 module.exports = app;
