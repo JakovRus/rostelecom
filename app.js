@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -6,6 +8,8 @@ const sassMiddleware = require('node-sass-middleware');
 
 const {favicon} = require('./middlewares/favicon');
 const {notFound} = require('./middlewares/404');
+
+const emailRouter = require('./routes/email');
 
 const app = express();
 
@@ -25,6 +29,8 @@ app.use(sassMiddleware({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/email', emailRouter);
 app.use(notFound);
 
 module.exports = app;
