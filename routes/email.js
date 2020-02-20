@@ -13,23 +13,43 @@ function getTransporterOptions() {
   }
 }
 
-function getMailOptions() {
+function getMailOptions(body) {
   return {
     from: process.env.GMAIL_USER,
-    to: '',
-    subject: 'Услуга',
-    text: 'Тариф 450',
-    html: 'Номер телефона: 891711111111',
+    to: process.env.GMAIL_RECEIVER,
+    subject: `${body.name} - ${body.phone}`,
+    html: `
+      <h1>${body.rate}</h1>
+      <div>${body.description}</div>
+      <div>${body.price}</div>
+    `,
   }
+}
+
+function isBodyInvalid(body) {
+  return !body &&
+    !body.name &&
+    !body.phone &&
+    !body.rate &&
+    !body.description &&
+    !body.price;
 }
 
 router.post('/', async function(req, res, next) {
   const transporter = nodemailer.createTransport(getTransporterOptions());
+  const invalid = isBodyInvalid(req.body);
+
+  if(invalid) {
+    console.log(invalid);
+    res.status(404).send();
+    return;
+  }
 
   try {
-    await transporter.sendMail(getMailOptions());
+    await transporter.sendMail(getMailOptions(req.body));
   } catch (error) {
-    next(error);
+    res.status(500).send(error.message);
+    return;
   }
 
   res.status(200).send('Success');
