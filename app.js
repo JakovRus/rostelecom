@@ -2,33 +2,19 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const sassMiddleware = require('node-sass-middleware');
+const gzipStatic = require('connect-gzip-static');
+const compression = require('compression');
 
-const {favicon} = require('./middlewares/favicon');
 const {notFound} = require('./middlewares/404');
-
-const emailRouter = require('./routes/email');
+const {emailRouter} = require('./routes/email');
 
 const app = express();
 
-app.use(favicon);
-
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(cookieParser());
-
-app.use(sassMiddleware({
-  src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public'),
-  indentedSyntax: true, // true = .sass and false = .scss
-  sourceMap: true
-}));
-
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(compression());
+app.use(gzipStatic(path.join(__dirname, 'public')));
 
 app.use('/email', emailRouter);
 app.use(notFound);
