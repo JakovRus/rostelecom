@@ -19,19 +19,29 @@ function getMailOptions(body) {
     to: process.env.GMAIL_RECEIVER,
     subject: `${body.name} - ${body.phone}`,
     html: `
-      <h1>${body.rate}</h1>
-      <div>${body.description}</div>
-      <div>${body.price}</div>
+      <h1>${body.rateName}</h1>
+      <ul>${getDescriptionList(body.description)}</ul>
+      <div>${body.price} р/мес</div>
     `,
   }
 }
 
+function getDescriptionList(description) {
+  return description
+    .map(item => {
+      return `<li>${item}</li>`
+    })
+    .reduce((result, current) => {
+      return result + current;
+    }, '');
+}
+
 function isBodyInvalid(body) {
-  return !body &&
-    !body.name &&
-    !body.phone &&
-    !body.rate &&
-    !body.description &&
+  return !body ||
+    !body.name ||
+    !body.phone ||
+    !body.rateName ||
+    !body.description ||
     !body.price;
 }
 
@@ -40,8 +50,7 @@ router.post('/', async function(req, res, next) {
   const invalid = isBodyInvalid(req.body);
 
   if(invalid) {
-    console.log(invalid);
-    res.status(404).send();
+    res.status(404).send('invalid');
     return;
   }
 
